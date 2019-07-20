@@ -120,3 +120,32 @@ theta.size() #torch.Size([2, 3])
 ![img](PyTorch操作备注.assets/20180812161246184.png)
 
 可以看出维度并没有变化，仍然为（1，2，3），这是因为只有维度为1时才会去掉。
+
+# 对图片进行裁剪，改变图片大小
+
+```python
+from PIL import Image
+import torchvision.transforms as transforms
+import matplotlib.pyplot as plt
+
+
+def readImage(path, size):
+    mode = Image.open(path)
+    transform1 = transforms.Compose([
+        transforms.Resize(size),
+        transforms.CenterCrop((size, size)),
+        transforms.ToTensor()
+    ])
+    mode = transform1(mode)
+    return mode
+
+
+def showTorchImage(image):
+    mode = transforms.ToPILImage()(image)
+    plt.imshow(mode)
+    plt.show()
+
+Example_Picture = readImage('dog.jpg',size=32)
+showTorchImage(Example_Picture)
+```
+
