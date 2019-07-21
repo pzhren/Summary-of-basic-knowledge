@@ -1,3 +1,17 @@
+# 根据设备自动调用CUDA
+
+```python
+use_cuda = torch.cuda.is_available() #判断设备是否可以使用GPU
+#如果可是使用GPU，则将模型、数据集、和标签转化为CUDA模式
+if use_cuda:
+    model.cuda()
+#对数据的处理
+for batch_idx, (data, target) in enumerate(train_loader):
+        if use_cuda:
+            data, target = data.cuda(), target.cuda()
+        data, target = Variable(data), Variable(target)
+```
+
 # 普通图片读取
 
 ## 使用from PIL import Image 读取图片
