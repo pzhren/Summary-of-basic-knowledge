@@ -1,3 +1,133 @@
+[TOC]
+
+# 自定义卷积的卷积核参数
+
+> 核心操作：
+
+`torch.nn.functional.conv2d(input, weight, bias=**None**, stride=1, padding=0, dilation=1, groups=1)`
+
+```python
+import torch.nn.functional as F
+import torch.autograd as autograd
+from torch.autograd import Variable
+#自定义kernel
+kernel = [[-1, 0, 1],
+          [-1, 0, 1],
+          [-1, 0, 1]]
+#拓展kernel，有四个维度：out_channels,in_channels,ksize,ksize
+kernel = torch.FloatTensor(kernel).expand(1,3,3,3)
+kernel = Variable(kernel, requires_grad = True) #将kernel转变为可以自动求导的参数，不要的话将其注释即可
+
+#这两种效果是一样的，Variable可以为其添加是否需要进行求导的属性
+inputs = Variable(torch.randn(1,3,5,5))
+#inputs = torch.randn(1,3,5,5)
+
+#求卷积操作
+F.conv2d(inputs, kernel, padding=0)
+```
+
+输出
+```python
+tensor([[[[ 0.5170,  0.5553, -0.9835],
+          [-2.5172, -1.6232,  4.6156],
+          [-0.3801, -3.9086,  6.6728]]]], grad_fn=<ThnnConv2DBackward>)
+```
+
+```python
+print(type(filters))
+print(kernel,inputs.grad)
+```
+输出
+```python
+<class 'torch.Tensor'>
+tensor([[[[-1.,  0.,  1.],
+          [-1.,  0.,  1.],
+          [-1.,  0.,  1.]],
+
+         [[-1.,  0.,  1.],
+          [-1.,  0.,  1.],
+          [-1.,  0.,  1.]],
+
+         [[-1.,  0.,  1.],
+          [-1.,  0.,  1.],
+          [-1.,  0.,  1.]]]], requires_grad=True) None
+```
+
+
+
+# [Python中的复制，深拷贝和浅拷贝](https://www.cnblogs.com/xueli/p/4952063.html)
+
+> 最好直接对每一个变量都进行初始化，如下所示，这样一个参数变化不会影响到另一个参数：
+>
+> ```python
+> foreground_image = torch.zeros(2,3,3,3)
+> background_image = torch.zeros(2,3,3,3)
+> ```
+
+## 直接赋值,默认浅拷贝传递对象的引用而已,原始列表改变，被赋值的b也会做相同的改变
+
+```python
+alist=[1,2,3,["a","b"]]
+b=alist
+print(b)
+alist.append(5)
+print(alist,b)
+```
+
+```
+[1, 2, 3, ['a', 'b']]
+[1, 2, 3, ['a', 'b'], 5] [1, 2, 3, ['a', 'b'], 5]
+```
+
+## copy浅拷贝，没有拷贝子对象，所以原始数据改变，子对象会改变
+
+```python
+>>> import copy
+
+>>> c=copy.copy(alist)
+>>> print alist;print c
+[1, 2, 3, ['a', 'b']]
+[1, 2, 3, ['a', 'b']]
+>>> alist.append(5)
+>>> print alist;print c
+[1, 2, 3, ['a', 'b'], 5]
+[1, 2, 3, ['a', 'b']]
+
+>>> alist[3]
+['a', 'b']
+>>> alist[3].append('cccc')
+>>> print alist;print c
+[1, 2, 3, ['a', 'b', 'cccc'], 5]
+[1, 2, 3, ['a', 'b', 'cccc']] 里面的子对象被改变了
+```
+
+## 深拷贝，包含对象里面的自对象的拷贝，所以原始对象的改变不会造成深拷贝里任何子元素的改变
+
+```python
+>>> import copy
+
+>>> d=copy.deepcopy(alist)
+>>> print alist;print d
+[1, 2, 3, ['a', 'b']]
+[1, 2, 3, ['a', 'b']]始终没有改变
+>>> alist.append(5)
+>>> print alist;print d
+[1, 2, 3, ['a', 'b'], 5]
+[1, 2, 3, ['a', 'b']]始终没有改变
+>>> alist[3]
+['a', 'b']
+>>> alist[3].append("ccccc")
+>>> print alist;print d
+[1, 2, 3, ['a', 'b', 'ccccc'], 5]
+[1, 2, 3, ['a', 'b']]  始终没有改变
+```
+
+
+
+# PyTorch中Tensor的查找和筛选
+
+[PyTorch中Tensor的查找和筛选](https://blog.csdn.net/tfcy694/article/details/85332953)
+
 # 根据设备自动调用CUDA
 
 ```python
@@ -11,6 +141,47 @@ for batch_idx, (data, target) in enumerate(train_loader):
             data, target = data.cuda(), target.cuda()
         data, target = Variable(data), Variable(target)
 ```
+
+# 官方数据的导入及调用
+
+[训练一个分类器](https://pytorch.apachecn.org/docs/0.3/blitz_cifar10_tutorial.html)
+
+```python
+#导入库
+import torch
+import torchvision
+import torchvision.transforms as transforms
+#torchvision 数据集的输出是范围 [0, 1] 的 PILImage 图像. 我们将它们转换为归一化范围是[-1,1]的张量
+
+#导入数据集CIFAR10
+transform = transforms.Compose([transforms.ToTensor(),transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))])
+trainset = torchvision.datasets.CIFAR10(root='./data', train=True,download=True, transform
+=transform)
+trainloader = torch.utils.data.DataLoader(trainset, batch_size=4,shuffle=True, num_workers=2)
+testset = torchvision.datasets.CIFAR10(root='./data', train=False,download=True, transform=
+transform)
+testloader = torch.utils.data.DataLoader(testset, batch_size=4,shuffle=False, num_workers=2)
+classes = ('plane', 'car', 'bird', 'cat','deer', 'dog', 'frog', 'horse', 'ship', 'truck')
+
+#调用数据
+import matplotlib.pyplot as plt
+import numpy as np
+# 定义函数来显示图像
+def imshow(img):
+    img = img / 2 + 0.5 # 非标准化
+    npimg = img.numpy()
+    plt.imshow(np.transpose(npimg, (1, 2, 0)))
+    plt.show()
+# 得到一些随机的训练图像
+dataiter = iter(trainloader)
+images, labels = dataiter.next()
+# 显示图像
+imshow(torchvision.utils.make_grid(images))
+# 输出类别
+print(' '.join('%5s' % classes[labels[j]] for j in range(4)))
+```
+
+![1563798462982](PyTorch操作备注.assets/1563798462982.png)
 
 # 普通图片读取
 

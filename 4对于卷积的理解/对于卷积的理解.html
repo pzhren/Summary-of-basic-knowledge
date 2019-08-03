@@ -1,0 +1,244 @@
+<!doctype html>
+<html style='font-size:14px !important'>
+<head>
+<meta charset='UTF-8'><meta name='viewport' content='width=device-width initial-scale=1'>
+<title>对于卷积的理解</title><style type='text/css'>html {overflow-x: initial !important;}:root { --bg-color:#ffffff; --text-color:#333333; --select-text-bg-color:#B5D6FC; --select-text-font-color:auto; --monospace:"Lucida Console",Consolas,"Courier",monospace; }
+html { font-size: 14px; background-color: var(--bg-color); color: var(--text-color); font-family: "Helvetica Neue", Helvetica, Arial, sans-serif; -webkit-font-smoothing: antialiased; }
+body { margin: 0px; padding: 0px; height: auto; bottom: 0px; top: 0px; left: 0px; right: 0px; font-size: 1rem; line-height: 1.42857; overflow-x: hidden; background: inherit; tab-size: 4; }
+iframe { margin: auto; }
+a.url { word-break: break-all; }
+a:active, a:hover { outline: 0px; }
+.in-text-selection, ::selection { text-shadow: none; background: var(--select-text-bg-color); color: var(--select-text-font-color); }
+#write { margin: 0px auto; height: auto; width: inherit; word-break: normal; overflow-wrap: break-word; position: relative; white-space: normal; overflow-x: visible; padding-top: 40px; }
+#write.first-line-indent p { text-indent: 2em; }
+#write.first-line-indent li p, #write.first-line-indent p * { text-indent: 0px; }
+#write.first-line-indent li { margin-left: 2em; }
+.for-image #write { padding-left: 8px; padding-right: 8px; }
+body.typora-export { padding-left: 30px; padding-right: 30px; }
+.typora-export .footnote-line, .typora-export li, .typora-export p { white-space: pre-wrap; }
+@media screen and (max-width: 500px) {
+  body.typora-export { padding-left: 0px; padding-right: 0px; }
+  #write { padding-left: 20px; padding-right: 20px; }
+  .CodeMirror-sizer { margin-left: 0px !important; }
+  .CodeMirror-gutters { display: none !important; }
+}
+#write li > figure:last-child { margin-bottom: 0.5rem; }
+#write ol, #write ul { position: relative; }
+img { max-width: 100%; vertical-align: middle; }
+button, input, select, textarea { color: inherit; font: inherit; }
+input[type="checkbox"], input[type="radio"] { line-height: normal; padding: 0px; }
+*, ::after, ::before { box-sizing: border-box; }
+#write h1, #write h2, #write h3, #write h4, #write h5, #write h6, #write p, #write pre { width: inherit; }
+#write h1, #write h2, #write h3, #write h4, #write h5, #write h6, #write p { position: relative; }
+p { line-height: inherit; }
+h1, h2, h3, h4, h5, h6 { break-after: avoid-page; break-inside: avoid; orphans: 2; }
+p { orphans: 4; }
+h1 { font-size: 2rem; }
+h2 { font-size: 1.8rem; }
+h3 { font-size: 1.6rem; }
+h4 { font-size: 1.4rem; }
+h5 { font-size: 1.2rem; }
+h6 { font-size: 1rem; }
+.md-math-block, .md-rawblock, h1, h2, h3, h4, h5, h6, p { margin-top: 1rem; margin-bottom: 1rem; }
+.hidden { display: none; }
+.md-blockmeta { color: rgb(204, 204, 204); font-weight: 700; font-style: italic; }
+a { cursor: pointer; }
+sup.md-footnote { padding: 2px 4px; background-color: rgba(238, 238, 238, 0.7); color: rgb(85, 85, 85); border-radius: 4px; cursor: pointer; }
+sup.md-footnote a, sup.md-footnote a:hover { color: inherit; text-transform: inherit; text-decoration: inherit; }
+#write input[type="checkbox"] { cursor: pointer; width: inherit; height: inherit; }
+figure { overflow-x: auto; margin: 1.2em 0px; max-width: calc(100% + 16px); padding: 0px; }
+figure > table { margin: 0px !important; }
+tr { break-inside: avoid; break-after: auto; }
+thead { display: table-header-group; }
+table { border-collapse: collapse; border-spacing: 0px; width: 100%; overflow: auto; break-inside: auto; text-align: left; }
+table.md-table td { min-width: 32px; }
+.CodeMirror-gutters { border-right: 0px; background-color: inherit; }
+.CodeMirror-linenumber { user-select: none; }
+.CodeMirror { text-align: left; }
+.CodeMirror-placeholder { opacity: 0.3; }
+.CodeMirror pre { padding: 0px 4px; }
+.CodeMirror-lines { padding: 0px; }
+div.hr:focus { cursor: none; }
+#write pre { white-space: pre-wrap; }
+#write.fences-no-line-wrapping pre { white-space: pre; }
+#write pre.ty-contain-cm { white-space: normal; }
+.CodeMirror-gutters { margin-right: 4px; }
+.md-fences { font-size: 0.9rem; display: block; break-inside: avoid; text-align: left; overflow: visible; white-space: pre; background: inherit; position: relative !important; }
+.md-diagram-panel { width: 100%; margin-top: 10px; text-align: center; padding-top: 0px; padding-bottom: 8px; overflow-x: auto; }
+#write .md-fences.mock-cm { white-space: pre-wrap; }
+.md-fences.md-fences-with-lineno { padding-left: 0px; }
+#write.fences-no-line-wrapping .md-fences.mock-cm { white-space: pre; overflow-x: auto; }
+.md-fences.mock-cm.md-fences-with-lineno { padding-left: 8px; }
+.CodeMirror-line, twitterwidget { break-inside: avoid; }
+.footnotes { opacity: 0.8; font-size: 0.9rem; margin-top: 1em; margin-bottom: 1em; }
+.footnotes + .footnotes { margin-top: 0px; }
+.md-reset { margin: 0px; padding: 0px; border: 0px; outline: 0px; vertical-align: top; background: 0px 0px; text-decoration: none; text-shadow: none; float: none; position: static; width: auto; height: auto; white-space: nowrap; cursor: inherit; -webkit-tap-highlight-color: transparent; line-height: normal; font-weight: 400; text-align: left; box-sizing: content-box; direction: ltr; }
+li div { padding-top: 0px; }
+blockquote { margin: 1rem 0px; }
+li .mathjax-block, li p { margin: 0.5rem 0px; }
+li { margin: 0px; position: relative; }
+blockquote > :last-child { margin-bottom: 0px; }
+blockquote > :first-child, li > :first-child { margin-top: 0px; }
+.footnotes-area { color: rgb(136, 136, 136); margin-top: 0.714rem; padding-bottom: 0.143rem; white-space: normal; }
+#write .footnote-line { white-space: pre-wrap; }
+@media print {
+  body, html { border: 1px solid transparent; height: 99%; break-after: avoid; break-before: avoid; }
+  #write { margin-top: 0px; padding-top: 0px; border-color: transparent !important; }
+  .typora-export * { -webkit-print-color-adjust: exact; }
+  html.blink-to-pdf { font-size: 13px; }
+  .typora-export #write { padding-left: 32px; padding-right: 32px; padding-bottom: 0px; break-after: avoid; }
+  .typora-export #write::after { height: 0px; }
+}
+.footnote-line { margin-top: 0.714em; font-size: 0.7em; }
+a img, img a { cursor: pointer; }
+pre.md-meta-block { font-size: 0.8rem; min-height: 0.8rem; white-space: pre-wrap; background: rgb(204, 204, 204); display: block; overflow-x: hidden; }
+p > .md-image:only-child:not(.md-img-error) img, p > img:only-child { display: block; margin: auto; }
+p > .md-image:only-child { display: inline-block; width: 100%; }
+#write .MathJax_Display { margin: 0.8em 0px 0px; }
+.md-math-block { width: 100%; }
+.md-math-block:not(:empty)::after { display: none; }
+[contenteditable="true"]:active, [contenteditable="true"]:focus { outline: 0px; box-shadow: none; }
+.md-task-list-item { position: relative; list-style-type: none; }
+.task-list-item.md-task-list-item { padding-left: 0px; }
+.md-task-list-item > input { position: absolute; top: 0px; left: 0px; margin-left: -1.2em; margin-top: calc(1em - 10px); border: none; }
+.math { font-size: 1rem; }
+.md-toc { min-height: 3.58rem; position: relative; font-size: 0.9rem; border-radius: 10px; }
+.md-toc-content { position: relative; margin-left: 0px; }
+.md-toc-content::after, .md-toc::after { display: none; }
+.md-toc-item { display: block; color: rgb(65, 131, 196); }
+.md-toc-item a { text-decoration: none; }
+.md-toc-inner:hover { text-decoration: underline; }
+.md-toc-inner { display: inline-block; cursor: pointer; }
+.md-toc-h1 .md-toc-inner { margin-left: 0px; font-weight: 700; }
+.md-toc-h2 .md-toc-inner { margin-left: 2em; }
+.md-toc-h3 .md-toc-inner { margin-left: 4em; }
+.md-toc-h4 .md-toc-inner { margin-left: 6em; }
+.md-toc-h5 .md-toc-inner { margin-left: 8em; }
+.md-toc-h6 .md-toc-inner { margin-left: 10em; }
+@media screen and (max-width: 48em) {
+  .md-toc-h3 .md-toc-inner { margin-left: 3.5em; }
+  .md-toc-h4 .md-toc-inner { margin-left: 5em; }
+  .md-toc-h5 .md-toc-inner { margin-left: 6.5em; }
+  .md-toc-h6 .md-toc-inner { margin-left: 8em; }
+}
+a.md-toc-inner { font-size: inherit; font-style: inherit; font-weight: inherit; line-height: inherit; }
+.footnote-line a:not(.reversefootnote) { color: inherit; }
+.md-attr { display: none; }
+.md-fn-count::after { content: "."; }
+code, pre, samp, tt { font-family: var(--monospace); }
+kbd { margin: 0px 0.1em; padding: 0.1em 0.6em; font-size: 0.8em; color: rgb(36, 39, 41); background: rgb(255, 255, 255); border: 1px solid rgb(173, 179, 185); border-radius: 3px; box-shadow: rgba(12, 13, 14, 0.2) 0px 1px 0px, rgb(255, 255, 255) 0px 0px 0px 2px inset; white-space: nowrap; vertical-align: middle; }
+.md-comment { color: rgb(162, 127, 3); opacity: 0.8; font-family: var(--monospace); }
+code { text-align: left; vertical-align: initial; }
+a.md-print-anchor { white-space: pre !important; border-width: initial !important; border-style: none !important; border-color: initial !important; display: inline-block !important; position: absolute !important; width: 1px !important; right: 0px !important; outline: 0px !important; background: 0px 0px !important; text-decoration: initial !important; text-shadow: initial !important; }
+.md-inline-math .MathJax_SVG .noError { display: none !important; }
+.html-for-mac .inline-math-svg .MathJax_SVG { vertical-align: 0.2px; }
+.md-math-block .MathJax_SVG_Display { text-align: center; margin: 0px; position: relative; text-indent: 0px; max-width: none; max-height: none; min-height: 0px; min-width: 100%; width: auto; overflow-y: hidden; display: block !important; }
+.MathJax_SVG_Display, .md-inline-math .MathJax_SVG_Display { width: auto; margin: inherit; display: inline-block !important; }
+.MathJax_SVG .MJX-monospace { font-family: var(--monospace); }
+.MathJax_SVG .MJX-sans-serif { font-family: sans-serif; }
+.MathJax_SVG { display: inline; font-style: normal; font-weight: 400; line-height: normal; zoom: 90%; text-indent: 0px; text-align: left; text-transform: none; letter-spacing: normal; word-spacing: normal; overflow-wrap: normal; white-space: nowrap; float: none; direction: ltr; max-width: none; max-height: none; min-width: 0px; min-height: 0px; border: 0px; padding: 0px; margin: 0px; }
+.MathJax_SVG * { transition: none 0s ease 0s; }
+.MathJax_SVG_Display svg { vertical-align: middle !important; margin-bottom: 0px !important; margin-top: 0px !important; }
+.os-windows.monocolor-emoji .md-emoji { font-family: "Segoe UI Symbol", sans-serif; }
+.md-diagram-panel > svg { max-width: 100%; }
+[lang="mermaid"] svg, [lang="flow"] svg { max-width: 100%; height: auto; }
+[lang="mermaid"] .node text { font-size: 1rem; }
+table tr th { border-bottom: 0px; }
+video { max-width: 100%; display: block; margin: 0px auto; }
+iframe { max-width: 100%; width: 100%; border: none; }
+.highlight td, .highlight tr { border: 0px; }
+
+
+:root { --side-bar-bg-color: #fafafa; --control-text-color: #777; }
+html { font-size: 16px; }
+body { font-family: "Open Sans", "Clear Sans", "Helvetica Neue", Helvetica, Arial, sans-serif; color: rgb(51, 51, 51); line-height: 1.6; }
+#write { max-width: 860px; margin: 0px auto; padding: 30px 30px 100px; }
+#write > ul:first-child, #write > ol:first-child { margin-top: 30px; }
+a { color: rgb(65, 131, 196); }
+h1, h2, h3, h4, h5, h6 { position: relative; margin-top: 1rem; margin-bottom: 1rem; font-weight: bold; line-height: 1.4; cursor: text; }
+h1:hover a.anchor, h2:hover a.anchor, h3:hover a.anchor, h4:hover a.anchor, h5:hover a.anchor, h6:hover a.anchor { text-decoration: none; }
+h1 tt, h1 code { font-size: inherit; }
+h2 tt, h2 code { font-size: inherit; }
+h3 tt, h3 code { font-size: inherit; }
+h4 tt, h4 code { font-size: inherit; }
+h5 tt, h5 code { font-size: inherit; }
+h6 tt, h6 code { font-size: inherit; }
+h1 { padding-bottom: 0.3em; font-size: 2.25em; line-height: 1.2; border-bottom: 1px solid rgb(238, 238, 238); }
+h2 { padding-bottom: 0.3em; font-size: 1.75em; line-height: 1.225; border-bottom: 1px solid rgb(238, 238, 238); }
+h3 { font-size: 1.5em; line-height: 1.43; }
+h4 { font-size: 1.25em; }
+h5 { font-size: 1em; }
+h6 { font-size: 1em; color: rgb(119, 119, 119); }
+p, blockquote, ul, ol, dl, table { margin: 0.8em 0px; }
+li > ol, li > ul { margin: 0px; }
+hr { height: 2px; padding: 0px; margin: 16px 0px; background-color: rgb(231, 231, 231); border: 0px none; overflow: hidden; box-sizing: content-box; }
+li p.first { display: inline-block; }
+ul, ol { padding-left: 30px; }
+ul:first-child, ol:first-child { margin-top: 0px; }
+ul:last-child, ol:last-child { margin-bottom: 0px; }
+blockquote { border-left: 4px solid rgb(223, 226, 229); padding: 0px 15px; color: rgb(119, 119, 119); }
+blockquote blockquote { padding-right: 0px; }
+table { padding: 0px; word-break: initial; }
+table tr { border-top: 1px solid rgb(223, 226, 229); margin: 0px; padding: 0px; }
+table tr:nth-child(2n), thead { background-color: rgb(248, 248, 248); }
+table tr th { font-weight: bold; border-width: 1px 1px 0px; border-top-style: solid; border-right-style: solid; border-left-style: solid; border-top-color: rgb(223, 226, 229); border-right-color: rgb(223, 226, 229); border-left-color: rgb(223, 226, 229); border-image: initial; border-bottom-style: initial; border-bottom-color: initial; text-align: left; margin: 0px; padding: 6px 13px; }
+table tr td { border: 1px solid rgb(223, 226, 229); text-align: left; margin: 0px; padding: 6px 13px; }
+table tr th:first-child, table tr td:first-child { margin-top: 0px; }
+table tr th:last-child, table tr td:last-child { margin-bottom: 0px; }
+.CodeMirror-lines { padding-left: 4px; }
+.code-tooltip { box-shadow: rgba(0, 28, 36, 0.3) 0px 1px 1px 0px; border-top: 1px solid rgb(238, 242, 242); }
+.md-fences, code, tt { border: 1px solid rgb(231, 234, 237); background-color: rgb(248, 248, 248); border-radius: 3px; padding: 2px 4px 0px; font-size: 0.9em; }
+code { background-color: rgb(243, 244, 244); padding: 0px 2px; }
+.md-fences { margin-bottom: 15px; margin-top: 15px; padding-top: 8px; padding-bottom: 6px; }
+.md-task-list-item > input { margin-left: -1.3em; }
+@media print {
+  html { font-size: 13px; }
+  table, pre { break-inside: avoid; }
+  pre { overflow-wrap: break-word; }
+}
+.md-fences { background-color: rgb(248, 248, 248); }
+#write pre.md-meta-block { padding: 1rem; font-size: 85%; line-height: 1.45; background-color: rgb(247, 247, 247); border: 0px; border-radius: 3px; color: rgb(119, 119, 119); margin-top: 0px !important; }
+.mathjax-block > .code-tooltip { bottom: 0.375rem; }
+.md-mathjax-midline { background: rgb(250, 250, 250); }
+#write > h3.md-focus::before { left: -1.5625rem; top: 0.375rem; }
+#write > h4.md-focus::before { left: -1.5625rem; top: 0.285714rem; }
+#write > h5.md-focus::before { left: -1.5625rem; top: 0.285714rem; }
+#write > h6.md-focus::before { left: -1.5625rem; top: 0.285714rem; }
+.md-image > .md-meta { border-radius: 3px; padding: 2px 0px 0px 4px; font-size: 0.9em; color: inherit; }
+.md-tag { color: rgb(167, 167, 167); opacity: 1; }
+.md-toc { margin-top: 20px; padding-bottom: 20px; }
+.sidebar-tabs { border-bottom: none; }
+#typora-quick-open { border: 1px solid rgb(221, 221, 221); background-color: rgb(248, 248, 248); }
+#typora-quick-open-item { background-color: rgb(250, 250, 250); border-color: rgb(254, 254, 254) rgb(229, 229, 229) rgb(229, 229, 229) rgb(238, 238, 238); border-style: solid; border-width: 1px; }
+.on-focus-mode blockquote { border-left-color: rgba(85, 85, 85, 0.12); }
+header, .context-menu, .megamenu-content, footer { font-family: "Segoe UI", Arial, sans-serif; }
+.file-node-content:hover .file-node-icon, .file-node-content:hover .file-node-open-state { visibility: visible; }
+.mac-seamless-mode #typora-sidebar { background-color: var(--side-bar-bg-color); }
+.md-lang { color: rgb(180, 101, 77); }
+.html-for-mac .context-menu { --item-hover-bg-color: #E6F0FE; }
+#md-notification .btn { border: 0px; }
+.dropdown-menu .divider { border-color: rgb(229, 229, 229); }
+
+
+#write { counter-reset: h1 0; }
+h1 { counter-reset: h2 0; }
+h2 { counter-reset: h3 0; }
+h3 { counter-reset: h4 0; }
+h4 { counter-reset: h5 0; }
+h5 { counter-reset: h6 0; }
+#write h1::before { counter-increment: h1 1; content: counter(h1) ". "; }
+#write h2::before { counter-increment: h2 1; content: counter(h1) "." counter(h2) ". "; }
+#write h3::before, h3.md-focus.md-heading::before { counter-increment: h3 1; content: counter(h1) "." counter(h2) "." counter(h3) ". "; }
+#write h4::before, h4.md-focus.md-heading::before { counter-increment: h4 1; content: counter(h1) "." counter(h2) "." counter(h3) "." counter(h4) ". "; }
+#write h5::before, h5.md-focus.md-heading::before { counter-increment: h5 1; content: counter(h1) "." counter(h2) "." counter(h3) "." counter(h4) "." counter(h5) ". "; }
+#write h6::before, h6.md-focus.md-heading::before { counter-increment: h6 1; content: counter(h1) "." counter(h2) "." counter(h3) "." counter(h4) "." counter(h5) "." counter(h6) ". "; }
+#write > h3.md-focus::before, #write > h4.md-focus::before, #write > h5.md-focus::before, #write > h6.md-focus::before, h3.md-focus::before, h4.md-focus::before, h5.md-focus::before, h6.md-focus::before { color: inherit; border: inherit; border-radius: inherit; position: inherit; left: initial; float: none; top: initial; font-size: inherit; padding-left: inherit; padding-right: inherit; vertical-align: inherit; font-weight: inherit; line-height: inherit; }
+
+
+</style>
+</head>
+<body class='typora-export os-windows' >
+<div  id='write'  class = 'is-node'><h1><a name="%E4%BB%80%E4%B9%88%E6%98%AF%E5%8D%B7%E7%A7%AF%EF%BC%8C%E4%B8%BA%E4%BB%80%E4%B9%88%E8%A6%81%E5%8D%B7%E7%A7%AF" class="md-header-anchor"></a><span>什么是卷积，为什么要卷积</span></h1><h2><a name="%E5%8D%B7%E7%A7%AF%E5%85%AC%E5%BC%8F" class="md-header-anchor"></a><span>卷积公式</span></h2><p><img src='对于卷积的理解.assets/20181106144554981.png' alt='img' referrerPolicy='no-referrer' /></p><blockquote><p><span>解释：t时刻的输出y(t)等于t时刻之前所有的输入x(p)与对应的权重系数h(t-p)的乘积之和。</span></p></blockquote><h3><a name="%E8%AE%A1%E7%AE%97%E5%85%B6%E4%B8%AD%E7%9A%84%E4%B8%80%E4%B8%AA%E5%85%83%E7%B4%A0%E8%BF%87%E7%A8%8B%E5%A6%82%E4%B8%8B%EF%BC%9A" class="md-header-anchor"></a><span>计算其中的一个元素过程如下：</span></h3><p><img src='对于卷积的理解.assets/20171205213905706.png' alt='è¿éåå¾çæè¿°' referrerPolicy='no-referrer' /></p><h3><a name="%E4%B8%8A%E8%BF%B0%E5%85%AC%E5%BC%8F%E5%9C%A8%E7%A6%BB%E6%95%A3%E4%BF%A1%E5%8F%B7%E4%B8%8A%E7%9A%84%E8%A7%A3%E9%87%8A" class="md-header-anchor"></a><span>上述公式在离散信号上的解释</span></h3><figure><table><thead><tr><th><span>已知x[0] = a, x[1] = b, x[2]=c</span></th><th><span>已知h[0] = i, h[1] = j, h[2]=k</span></th></tr></thead><tbody><tr><td><img src='对于卷积的理解.assets/20170125145104251.png' alt='è¿éåå¾çæè¿°' referrerPolicy='no-referrer' /></td><td><img src='对于卷积的理解.assets/20170125145148720.png' alt='è¿éåå¾çæè¿°' referrerPolicy='no-referrer' /></td></tr></tbody></table></figure><p><span>下面通过演示求x* h卷积过程，揭示卷积的物理意义：</span></p><figure><table><thead><tr><th><span>第一步，x[n]乘以h[0]并平移到位置0：</span></th><th><span>第二步，x[n]乘以h[1]并平移到位置1</span></th></tr></thead><tbody><tr><td><img src='对于卷积的理解.assets/20170125145221049.png' alt='è¿éåå¾çæè¿°' referrerPolicy='no-referrer' /></td><td><img src='对于卷积的理解.assets/20170125145254830.png' alt='è¿éåå¾çæè¿°' referrerPolicy='no-referrer' /></td></tr><tr><td><span>第三步，x[n]乘以h[2]并平移到位置2：</span></td><td><span>最后，把上面三个图叠加，就得到了x* h：</span></td></tr><tr><td><img src='对于卷积的理解.assets/20170125145329799.png' alt='è¿éåå¾çæè¿°' referrerPolicy='no-referrer' /></td><td><img src='对于卷积的理解.assets/1563504544494.png' alt='1563504544494' referrerPolicy='no-referrer' /></td></tr></tbody></table></figure><p><span>从这里，可以看到卷积的重要的物理意义是：一个函数（如：单位响应）在另一个函数（如：输入信号）上的加权叠加。</span></p><p><span>卷积的意义：加权叠加</span></p><p><img src='对于卷积的理解.assets/20171205211420901.png' alt='è¿éåå¾çæè¿°' referrerPolicy='no-referrer' /></p><p><span>对上述运算使用卷积计算公式：</span></p><div contenteditable="false" spellcheck="false" class="mathjax-block md-end-block md-math-block md-rawblock" id="mathjax-n34" cid="n34" mdtype="math_block"><div class="md-rawblock-container md-math-container" tabindex="-1"><script type="math/tex; mode=display">y[0]=\sum x[p]*h[o-p]=x[0]*h[0-0]=x[0]*h[0]=a*i \\
+y[1]=\sum x[p]*h[1-p]=x[0]*h[1]+x[1]*h[0]=a*j+b*i</script></div></div><h2><a name="%E5%8D%B7%E7%A7%AF%E6%9C%89%E4%BB%80%E4%B9%88%E7%94%A8" class="md-header-anchor"></a><span>卷积有什么用</span></h2><h3><a name="%E5%81%9A%E5%A4%9A%E4%BD%8D%E6%95%B0%E4%B9%98%E6%B3%95" class="md-header-anchor"></a><span>做多位数乘法</span></h3><p><img src='https://www.zhihu.com/equation?tex=%5Cbegin%7Balign%7D%0A42+%5Ctimes137+%26%3D+%282%5Ctimes10%5E0%2B4%5Ctimes10%5E1%29%287%5Ctimes10%5E0%2B3%5Ctimes10%5E1%2B1%5Ctimes10%5E2%29+%5C%5C%0A%26%3D+%282%5Ctimes7%29%5Ctimes10%5E0+%2B+%282%5Ctimes3%2B4%5Ctimes7%29%5Ctimes10%5E1%2B%282%5Ctimes1%2B4%5Ctimes3%29%5Ctimes10%5E2+%2B+%284%5Ctimes1%29%5Ctimes10%5E3+%5C%5C%0A%26%3D+14+%2B+340%2B1400%2B4000+%5C%5C%0A%26%3D+5754%0A%5Cend%7Balign%7D' alt='\begin{align}42 \times137 &amp;= (对于卷积的理解.assets/equation.svg)(7\times10^0+3\times10^1+1\times10^2) \\&amp;= (2\times7)\times10^0 + (2\times3+4\times7)\times10^1+(2\times1+4\times3)\times10^2 + (4\times1)\times10^3 \\&amp;= 14 + 340+1400+4000 \\&amp;= 5754\end{align}' referrerPolicy='no-referrer' /></p><p><span>注意第二个等号右边每个括号里的系数构成的序列 (14,34,14,4)，实际上就是序列 (2,4) 和 (7,3,1) 的卷积。</span></p><p>&nbsp;</p><p><img src='https://www.zhihu.com/equation?tex=%28%5Csum_%7Bn%3D1%7D%5E%7B%5Cinfty%7D%7Ba_nx%5En%7D%29%28%5Csum_%7Bn%3D1%7D%5E%7B%5Cinfty%7D%7Bb_nx%5En%7D%29%3D%5Csum_%7Bn%3D1%7D%5E%7B%5Cinfty%7D%28%5Csum_%7Bk%3D1%7D%5E%7Bn%7Da_kb_%7Bn-k%7D%29x%5En' alt='(对于卷积的理解.assets/equation-1563451953306.svg)(\sum_{n=1}^{\infty}{b_nx^n})=\sum_{n=1}^{\infty}(\sum_{k=1}^{n}a_kb_{n-k})x^n' referrerPolicy='no-referrer' /></p><p><strong><img src='对于卷积的理解.assets/equation-1563452579267.svg' alt='x^n' referrerPolicy='no-referrer' /><span>是“基”，</span><img src='对于卷积的理解.assets/equation-1563452579286.svg' alt='a_n' referrerPolicy='no-referrer' /><span>是在这个基上的展开系数。两个多项式的乘积</span></strong><span>在基上展开的系数就是</span><strong><span>两个多项式各自在基上展开系数的卷积</span></strong><span>。</span></p><p><img src='https://www.zhihu.com/equation?tex=x%5En' alt='x^n' referrerPolicy='no-referrer' /><span>对应着频率不同的</span><img src='https://www.zhihu.com/equation?tex=%5Cexp%28ikt%29' alt='\exp(对于卷积的理解.assets/equation-1563452571881.svg)' referrerPolicy='no-referrer' /><span>，</span><strong><span>系数对应着其傅里叶变换</span></strong><span>。自然就是</span><strong><span>傅里叶变换的乘积</span></strong><span>等于</span><strong><span>傅里叶变换的卷积</span></strong><span>了。</span></p><h3><a name="%E5%8D%B7%E7%A7%AF%E7%9A%84%E5%86%85%E6%A0%B8" class="md-header-anchor"></a><span>卷积的内核</span></h3><figure><table><thead><tr><th><span>傅里叶变换</span></th><th><span>欧拉公式</span></th></tr></thead><tbody><tr><td><img src='https://www.zhihu.com/equation?tex=F%28%5Comega%29%3D%5Cint_%7B-%5Cinfty+%7D%5E%7B%2B%5Cinfty%7D+f%28t%29e%5E%7B-j%5Comega+t%7Ddt+' alt='F(对于卷积的理解.assets/equation-1563457053976.svg)=\int_{-\infty }^{+\infty} f(t)e^{-j\omega t}dt' referrerPolicy='no-referrer' /></td><td><img src='对于卷积的理解.assets/equation-1563457089743.svg' alt='e^{ix}=cosx+isinx' referrerPolicy='no-referrer' /></td></tr></tbody></table></figure><p><img src='对于卷积的理解.assets/20181106144554981.png' alt='img' referrerPolicy='no-referrer' /></p><h2><a name="%E5%AF%B9%E5%82%85%E9%87%8C%E5%8F%B6%E5%8F%98%E6%8D%A2%E7%9A%84%E8%A7%A3%E9%87%8A" class="md-header-anchor"></a><span>对傅里叶变换的解释</span></h2><p><span>傅里叶变换公式：</span></p><p><span>f(t)是t的</span><a href='https://baike.baidu.com/item/%E5%91%A8%E6%9C%9F%E5%87%BD%E6%95%B0'><span>周期函数</span></a><span>，如果t满足</span><a href='https://baike.baidu.com/item/%E7%8B%84%E9%87%8C%E8%B5%AB%E8%8E%B1%E6%9D%A1%E4%BB%B6'><span>狄里赫莱条件</span></a><span>：在一个以2T为周期内f(X)连续或只有有限个第一类间断点，附f（x）单调或可划分成有限个单调区间，则F（x）以2T为周期的傅里叶级数收敛，和函数S（x）也是以2T为周期的周期函数，且在这些间断点上，</span><a href='https://baike.baidu.com/item/%E5%87%BD%E6%95%B0'><span>函数</span></a><span>是有限值；在一个周期内具有有限个极值点；绝对可积。则有下图①式成立。称为积分运算f(t)的</span><strong><span>傅立叶变换</span></strong><span>：</span></p><p><img src='对于卷积的理解.assets/u=3356269930,1126074676&amp;fm=58.jpg' alt='formula' referrerPolicy='no-referrer' /></p><p><span>公式描述：</span></p><p><span>公式中F(ω)为f(t)的像函数，f(t)为F(ω)的像原函数。</span></p><p><span>对于满足狄里赫利(Dirichlet)条件的</span><strong><span>周期信号</span></strong><span>，</span><strong><span>可以分解为一组成谐波关系的正弦信号</span></strong><span>，或者说该周期信号做傅里叶变换可以得到一组傅里叶级数。</span></p><ul><li><p><span>频率iw：</span></p><p><span>对于周期信号，既然知道了其中的各个成分是成谐波关系的，那么频率成分就确定了。</span></p></li><li><p><span>幅值f(t)：</span></p><p><span>所以在不考虑相位差的情况下，问题关键是如何得到这些成谐波关系的正弦信号前的</span><strong><span>系数</span></strong><span>（或者说，谐波的幅值，也即是各个成分的大小）。而傅里叶变换的公式恰恰就给了我们解决该问题途径。也就是本文最开始那个公式了。由待分析的周期信号</span><em><span>x</span></em><span>(</span><em><span>t</span></em><span>)，可以积分得到其中所包含的谐波成分的幅值ak，而将这些频率成分全部相加则可以重构出原周期信号。</span></p></li></ul><h3><a name="%E4%B8%AA%E4%BA%BA%E7%AE%80%E4%BB%8B" class="md-header-anchor"></a><span>个人简介</span></h3><blockquote><p><span>傅里叶的一生很传奇，幼年时父母相继离世，二十多岁毕业后当了数学老师，后又被聘任为巴黎综合理工学院的教授。但他并不是一个安分的人，20岁的血气方刚恰逢当时的法国大革命，他的一些政治行动曾两次险些将其送上断头台，但他也因此获得了拿破仑的器重。</span></p><p><span>三十岁时傅里叶跟随拿破仑东征，被任命为下埃及总督，并负责为法军的远征部队提供军火。在此期间，这个教过书、造过反、还给拿破仑背过枪的人竟然还向开罗埃及学院递交了几篇有关数学的论文。内容主要是关于他在三角级数方面的贡献。</span></p><p><span>拿破仑远征军失败后，他回国并于1801年被任命为伊泽尔省格伦诺布尔地方长官。到了1807年，傅里叶在研究中发现了一系列成谐波关系的正弦曲线可以用来表示物体内的温度分布。他还声称，</span><strong><span>“任何”周期信号都可以用一系列成谐波关系的正弦曲线来表示。</span></strong></p><p><span>他随后向巴黎科学院呈交了这篇名为《热的传播》的论文，主审这篇文章的四个人中。</span><strong><span>拉克尔华(F. Lacroix) 、蒙日(G. Monge)和拉普拉斯(P. S. de Laplace)都赞成发表这篇论文，但是拉格朗日(J. L. Lagrange)坚持拒绝傅里叶提出的这一套三角级数理论，因为在他看来，三角级数的适用范围及其有限，不可能把具有例如导数不连续的信号表现出来。</span></strong></p><p><span>由于拉格朗日的强烈反对，导致傅里叶的这篇论文从未发表。在几次尝试让法国学院接受和出版他的论文后，傅里叶着手撰写他作品的另一个版本。1822年，傅里叶将这套理论写在了他的著作:《热的解析理论》之中。这距离他首次提出该理论已经过去了整整15年。</span></p></blockquote><h3><a name="%E5%82%85%E9%87%8C%E5%8F%B6%E5%8F%98%E6%8D%A2%E7%A4%BA%E4%BE%8B" class="md-header-anchor"></a><span>傅里叶变换示例</span></h3><blockquote><p><span>傅里叶认为：“任何”周期信号都可以用一系列成</span><strong><span>谐波关系的正弦曲线</span></strong><span>来表示。</span></p></blockquote><figure><table><thead><tr><th><span>获得制作橘子香蕉牛奶冰沙的比例</span></th><th><span>经过过滤器得到的配比</span></th></tr></thead><tbody><tr><td><img src='对于卷积的理解.assets/1778684-98e202c7dcf067cc.webp' alt='img' referrerPolicy='no-referrer' /></td><td><span>经过“香蕉过滤器”，得到1个单位量的香蕉； 经过“橘子过滤器”，得到2个单位量的橘子； 经过“牛奶过滤器”，得到3个单位量的牛奶； 经过“冰沙过滤器”，得到3个单位量的冰沙。</span></td></tr></tbody></table></figure><blockquote><p><span>其中的，</span></p><ol start='' ><li><span>橘子香蕉牛奶冰沙==“任何”周期信号</span></li><li><span>过滤器==傅里叶变换</span></li><li><span>配比==一系列成谐波关系的正弦曲线</span></li></ol></blockquote><h3><a name="%E6%AD%A3%E5%BC%A6%E4%BF%A1%E5%8F%B7%E7%9A%84%E4%B8%A4%E7%A7%8D%E8%BF%90%E5%8A%A8%E6%96%B9%E5%BC%8F" class="md-header-anchor"></a><span>正弦信号的两种运动方式</span></h3><figure><table><thead><tr><th><span>一种是以时间为横轴、位移为纵轴，某一点的往复运动，也就是通常所说的正弦波，或者说是振荡信号</span></th><th><span>某一点绕另一点的匀速圆周运动。两种情况综合起来为下图所示。正弦波就是一个圆周运动在一条直线上的投影。</span></th></tr></thead><tbody><tr><td><img src='对于卷积的理解.assets/1778684-ead0be0eb5cd512a.webp' alt='img' referrerPolicy='no-referrer' /></td><td><img src='对于卷积的理解.assets/1778684-7cfb4819ed554052.webp' alt='img' referrerPolicy='no-referrer' /></td></tr></tbody></table></figure><p><span>那么所有圆周运动（或振荡信号）组合起来得到的位置随时间的变化情况也就是我们最终的信号。这和从原材料得到最终的“橘子香蕉牛奶冰沙”过程类似。</span></p><p><span>同样，如果反过来，傅里叶级数能够将任何周期信号分解成一个（甚至是由无穷多个元素组成的）简单振荡信号的集合。</span></p><h3><a name="%E4%B8%89%E7%A7%8D%E4%BF%A1%E5%8F%B7%E7%9A%84%E5%90%88%E6%88%90%EF%BC%9A%E6%96%B9%E6%B3%A2%E3%80%81%E9%94%AF%E9%BD%BF%E6%B3%A2%E5%92%8C%E4%B8%89%E8%A7%92%E6%B3%A2" class="md-header-anchor"></a><span>三种信号的合成：方波、锯齿波和三角波</span></h3><h4><a name="%E6%96%B9%E6%B3%A2" class="md-header-anchor"></a><span>方波</span></h4><p><span>虽然组成方波的这些信号都是正弦信号，但是这些正弦信号之间还需要满足一定的条件。考虑组成方波的正弦信号，方波可由以下公式表示，其中</span><em><span>n</span></em><span>为奇数：</span></p><p><img src='对于卷积的理解.assets/1778684-87d7541841366871.webp' alt='img' referrerPolicy='no-referrer' /></p><p><span>这里，</span><em><span>ω</span></em><span>称为基波频率，而3</span><em><span>ω</span></em><span>、5</span><em><span>ω</span></em><span>、</span><em><span>nω</span></em><span>等均为</span><em><span>ω</span></em><span>的整数倍。这些大于基波频率，且是</span><strong><span>基波频率整数倍的各次分量称为谐波</span></strong><span>。对于方波，基波的各偶数次谐波的幅值为零。</span><strong><span>这些谐波成分也就是组成方波的原材料</span></strong><span>。</span></p><figure><table><thead><tr><th><span>方波也称为矩形波，但是这种“方方正正”的信号的确可以分解为无限多个正弦信号的组合。下图展示了方波的傅里叶级数的前50项的叠加过程，如果项数继续增加，则最终趋近方波。</span></th><th><span>时域的方波信号就被投影到了</span><strong><span>频域</span></strong><span>。时域的方波信号是以横轴为时间轴；频域中，横轴为频率。这样，一组随时间变化的时域正弦信号被表示为频域的一组离散点。频域每个离散点的横坐标代表一个谐波频率，而其纵坐标则代表该频率的谐波所对应的振动幅度。</span></th></tr></thead><tbody><tr><td><img src='对于卷积的理解.assets/1778684-b379928af3a37727.webp' alt='img' referrerPolicy='no-referrer' /></td><td><img src='对于卷积的理解.assets/1778684-8351e18543384e4a.webp' alt='img' referrerPolicy='no-referrer' /></td></tr><tr><td><img src='对于卷积的理解.assets/1778684-9541ce91a8292a22.webp' alt='img' referrerPolicy='no-referrer' /></td><td><img src='对于卷积的理解.assets/1778684-3e7cecc1c659ee49-1563455115930.webp' alt='img' referrerPolicy='no-referrer' /></td></tr></tbody></table></figure><h4><a name="%E9%94%AF%E9%BD%BF%E6%B3%A2" class="md-header-anchor"></a><span>锯齿波</span></h4><p><span>考虑组成锯齿波的正弦信号，锯齿波可由以下公式表示，</span><em><span>n</span></em><span>为正整数：</span></p><p><img src='对于卷积的理解.assets/1778684-7847341c882d74d5.webp' alt='img' referrerPolicy='no-referrer' /></p><p><span>下图展示了锯齿波的傅里叶级数的前50项的叠加过程，如果项数继续增加，则最终趋近锯齿波。</span></p><p><img src='对于卷积的理解.assets/1778684-611c92a044fc45c3.webp' alt='img' referrerPolicy='no-referrer' /></p><figure><table><thead><tr><th>&nbsp;</th><th>&nbsp;</th></tr></thead><tbody><tr><td><img src='对于卷积的理解.assets/1778684-e9965e39f7349bc3.webp' alt='img' referrerPolicy='no-referrer' /></td><td><img src='对于卷积的理解.assets/1778684-bb8a79b1db38c650.webp' alt='img' referrerPolicy='no-referrer' /></td></tr></tbody></table></figure><h4><a name="%E4%B8%89%E8%A7%92%E6%B3%A2" class="md-header-anchor"></a><span>三角波</span></h4><figure><table><thead><tr><th><span>对于三角波，与上面的两种类似，下图展示了三角波的傅里叶级数的前25项的叠加过程，如果项数继续增加，则最终趋近三角波</span></th><th><span>从圆周运动的角度看叠加过程如下图所示：</span></th></tr></thead><tbody><tr><td><img src='对于卷积的理解.assets/1778684-5b6349464d477e01.webp' alt='img' referrerPolicy='no-referrer' /></td><td><img src='对于卷积的理解.assets/1778684-ff99d2a96422b483.webp' alt='img' referrerPolicy='no-referrer' /></td></tr></tbody></table></figure><p>&nbsp;</p><h2><a name="%E6%9E%9C%E5%A3%B3%E4%B8%8A%E7%9A%84%E4%B8%80%E4%B8%AA%E8%A7%A3%E9%87%8A" class="md-header-anchor"></a><span>果壳上的一个解释 </span></h2><p><span>比如说你的老板命令你干活，你却到楼下打台球去了，后来被老板发现，他非常气愤，扇了你一巴掌（注意，这就是输入信号，脉冲），于是你的脸上会渐渐地（贱贱地）鼓起来一个包，你的脸就是一个系统，而鼓起来的包就是你的脸对巴掌的响应，好，这样就和信号系统建立起来意义对应的联系。</span></p><p><span>下面还需要一些假设来保证论证的严谨：假定你的脸是线性时不变系统，也就是说，无论什么时候老板打你一巴掌，打在你脸的同一位置（这似乎要求你的脸足够光滑，如果你说你长了很多青春痘，甚至整个脸皮处处连续处处不可导，那难度太大了，我就无话可说了哈哈），你的脸上总是会在相同的时间间隔内鼓起来一个相同高度的包来，并且假定以鼓起来的包的大小作为系统输出。好了，那么，下面可以进入核心内容——卷积了！ </span></p><p><span>如果你每天都到地下去打台球，那么老板每天都要扇你一巴掌，不过当老板打你一巴掌后，你5分钟就消肿了，所以时间长了，你甚至就适应这种生活了……如果有一天，老板忍无可忍，以0.5秒的间隔开始不间断的扇你的过程，这样问题就来了，第一次扇你鼓起来的包还没消肿，第二个巴掌就来了，你脸上的包就可能鼓起来两倍高，老板不断扇你，脉冲不断作用在你脸上，效果不断叠加了，这样这些效果就可以求和了，结果就是你脸上的包的高度随时间变化的一个函数了（注意理解）；</span></p><p><span>如果老板再狠一点，频率越来越高，以至于你都辨别不清时间间隔了，那么，求和就变成积分了。可以这样理解，在这个过程中的某一固定的时刻，你的脸上的包的鼓起程度和什么有关呢？和之前每次打你都有关！但是各次的贡献是不一样的，越早打的巴掌，贡献越小，所以这就是说，某一时刻的输出是之前很多次输入乘以各自的衰减系数之后的叠加而形成某一点的输出，然后再把不同时刻的输出点放在一起，形成一个函数，这就是卷积，卷积之后的函数就是你脸上的包的大小随时间变化的函数。</span></p><p><span>本来你的包几分钟就可以消肿，可是如果连续打，几个小时也消不了肿了，这难道不是一种平滑过程么？反映到剑桥大学的公式上.</span></p><blockquote><p><span>f(a)就是第a个巴掌，g(x-a)就是第a个巴掌在x时刻的作用程度，乘起来再叠加就ok了</span></p></blockquote></div>
+</body>
+</html>
