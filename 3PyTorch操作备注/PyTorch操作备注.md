@@ -1,5 +1,54 @@
 [TOC]
 
+# Python学习笔记之optparse模块OptionParser
+
+```python
+from optparse import OptionParser
+optParser = OptionParser()
+optParser.add_option('-f','--file',action = 'store',type = "string" ,dest = 'filename')
+optParser.add_option("-v","--vison", action="store_false", dest="verbose",
+                     default='hello',help="make lots of noise [default]")
+#optParser.parse_args() 剖析并返回一个字典和列表，
+#字典中的关键字是我们所有的add_option()函数中的dest参数值，
+#而对应的value值，是add_option()函数中的default的参数或者是
+#由用户传入optParser.parse_args()的参数
+fakeArgs = ['-f','file.txt','-v','how are you', 'arg1', 'arg2']
+option , args = optParser.parse_args()
+op , ar = optParser.parse_args(fakeArgs)
+print("option : ",option)
+print("args : ",args)
+print("op : ",op)
+print("ar : ",ar)
+```
+
+输出：
+
+```python
+option :  {'filename': None, 'verbose': 'hello'}
+args :  []
+op :  {'filename': 'file.txt', 'verbose': False}
+ar :  ['how are you', 'arg1', 'arg2']
+--------------------- 
+作者：m0_37717595 
+来源：CSDN 
+原文：https://blog.csdn.net/m0_37717595/article/details/80603884 
+版权声明：本文为博主原创文章，转载请附上博文链接！
+```
+
+
+
+
+
+# 目录问题
+
+```
+./ 当前目录。
+../ 父级目录。
+/ 根目录。
+```
+
+
+
 # 自定义卷积的卷积核参数
 
 > 核心操作：
@@ -333,4 +382,5 @@ def showTorchImage(image):
 Example_Picture = readImage('dog.jpg',size=32)
 showTorchImage(Example_Picture)
 ```
+
 
