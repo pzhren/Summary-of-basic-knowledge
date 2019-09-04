@@ -1,43 +1,611 @@
 [TOC]
 
-# Python学习笔记之optparse模块OptionParser
+# 对shape的操作
 
 ```python
-from optparse import OptionParser
-optParser = OptionParser()
-optParser.add_option('-f','--file',action = 'store',type = "string" ,dest = 'filename')
-optParser.add_option("-v","--vison", action="store_false", dest="verbose",
-                     default='hello',help="make lots of noise [default]")
-#optParser.parse_args() 剖析并返回一个字典和列表，
-#字典中的关键字是我们所有的add_option()函数中的dest参数值，
-#而对应的value值，是add_option()函数中的default的参数或者是
-#由用户传入optParser.parse_args()的参数
-fakeArgs = ['-f','file.txt','-v','how are you', 'arg1', 'arg2']
-option , args = optParser.parse_args()
-op , ar = optParser.parse_args(fakeArgs)
-print("option : ",option)
-print("args : ",args)
-print("op : ",op)
-print("ar : ",ar)
+import torch
+a = torch.tensor([[1,2,3,4,5,6],[7,8,9,10,11,12]])
+a.shape
+Out[50]: torch.Size([2, 6])
+b = a.view(2,2,3)
+b
+Out[52]: 
+tensor([[[ 1,  2,  3],
+         [ 4,  5,  6]],
+        [[ 7,  8,  9],
+         [10, 11, 12]]])
+c = b.permute(0,2,1).contiguous()
+d = c.view(2,6)
+d
+Out[58]: 
+tensor([[ 1,  4,  2,  5,  3,  6],
+        [ 7, 10,  8, 11,  9, 12]])
+```
+
+
+
+# 文件读取
+
+## 读取.pkl文件
+
+- python3
+
+```python
+import pickle as pkl
+def pkl_load(path):
+    with open(path, 'rb') as f:
+        data = pkl.load(f)
+    return data
+```
+
+
+
+# 多线程异步处理
+
+```python
+from multiprocessing import Pool
+import time
+def f(x):
+    print(x*x)
+if __name__ == '__main__':
+    pool = Pool(processes=4)
+    pool.map(f, range(10))
+    r  = pool.map_async(f, range(10))
+    # DO STUFF
+    print ('HERE')
+    r.wait()
+    print ('MORE')
+    print ('DONE')
+
+#Out：
+0
+1
+4
+9
+16
+25
+36
+49
+64
+81
+HERE
+0
+1
+4
+9
+16
+25
+36
+49
+81
+64
+MORE
+DONE
+```
+
+> 参考：[[python-2.7 – Python多处理：map vs map_async](https://codeday.me/bug/20180920/256512.html)]
+
+# kill GPU缓存
+
+```shell
+r@r-Super-Server:~$ nvidia-smi
+Sun Aug 25 10:23:02 2019       
++-----------------------------------------------------------------------------+
+| NVIDIA-SMI 430.40       Driver Version: 430.40       CUDA Version: 10.1     |
+|-------------------------------+----------------------+----------------------+
+| GPU  Name        Persistence-M| Bus-Id        Disp.A | Volatile Uncorr. ECC |
+| Fan  Temp  Perf  Pwr:Usage/Cap|         Memory-Usage | GPU-Util  Compute M. |
+|===============================+======================+======================|
+|   0  GeForce GTX 1070    Off  | 00000000:03:00.0  On |                  N/A |
+|ERR!   43C    P8     9W / 250W |   8040MiB /  8111MiB |      0%      Default |
++-------------------------------+----------------------+----------------------+
+                                                                               
++-----------------------------------------------------------------------------+
+| Processes:                                                       GPU Memory |
+|  GPU       PID   Type   Process name                             Usage      |
+|=============================================================================|
+|    0      1164      G   /usr/lib/xorg/Xorg                            49MiB |
+|    0      4242      C   ...anaconda3/envs/pytorch110/bin/python3.5  7979MiB |
++-----------------------------------------------------------------------------+
+r@r-Super-Server:~$ kill 4242 pid
+-bash: kill: pid: 参数必须是进程或任务 ID
+```
+
+
+
+# 模型的保存与加载
+
+[Pytorch模型的保存与加载](https://blog.csdn.net/liuweiyuxiang/article/details/82224374)
+
+- 模型加载
+
+  ```python
+  i3d = InceptionI3d(400, in_channels=3)
+  i3d.load_state_dict(torch.load('models/rgb_imagenet.pt')) #加载rgb模型的参数
+  ```
+
+- 使用多GPU
+
+  ```python
+  i3d.cuda()
+  i3d = nn.DataParallel(i3d)
+  ```
+
+  
+
+# 创建张量
+
+创建一个没有初始化的5×3矩阵：
+
+```python
+x = torch.empty(5, 3)
+```
+
+创建一个随机初始化矩阵：
+
+```python
+x = torch.rand(5, 3)
+```
+
+一个构造填满`0`御姐数据类型为`long`的矩阵：
+
+```python
+x = torch.zeros(5, 3, dtype=torch.long)
+```
+
+直接从数据构造张量：
+
+```python
+x = torch.tensor([5.5, 3])
+```
+
+或者根据已有的张量建立新的张除非用户提供新的值，否则这些方法将重用输入张量的属性，例如D型等。：
+
+```python
+x = x.new_ones(5, 3, dtype=torch.double)      # new_* methods take in sizes
+print(x)
+
+x = torch.randn_like(x, dtype=torch.float)    # 重载 dtype!
+print(x)                                      # 结果size一致
+```
+
+## 将torch的Tensor转化为NumPy数组
+
+输入：
+
+```python
+a = torch.ones(5)
+print(a)
 ```
 
 输出：
 
 ```python
-option :  {'filename': None, 'verbose': 'hello'}
-args :  []
-op :  {'filename': 'file.txt', 'verbose': False}
-ar :  ['how are you', 'arg1', 'arg2']
---------------------- 
-作者：m0_37717595 
-来源：CSDN 
-原文：https://blog.csdn.net/m0_37717595/article/details/80603884 
-版权声明：本文为博主原创文章，转载请附上博文链接！
+tensor([1., 1., 1., 1., 1.])
 ```
 
+输入：
+
+```python
+b = a.numpy()
+print(b)
+```
+
+输出：
+
+```python
+[1. 1. 1. 1. 1.]
+```
+
+## 将NumPy数组转化为Torch张量
+
+看改变NumPy数组是如何自动改变Torch张量的：
+
+```python
+import numpy as np
+a = np.ones(5)
+b = torch.from_numpy(a)
+np.add(a, 1, out=a)
+print(a)
+print(b)
+```
+
+输出：
+
+```python
+[2. 2. 2. 2. 2.]
+tensor([2., 2., 2., 2., 2.], dtype=torch.float64)
+```
+
+# Python学习笔记之optparse模块OptionParser
+
+[python argparse用法总结](https://www.cnblogs.com/yymn/p/8056487.html)
+
+## 基础用法
+
+```python
+#!/usr/bin/env python
+# encoding: utf-8
+import argparse
+parser = argparse.ArgumentParser()
+parser.parse_args()
+
+#测试：
+yarving@yarving-VirtualBox /tmp $ python prog.py 
+yarving@yarving-VirtualBox /tmp $ python prog.py --help
+usage: prog.py [-h]
+optional arguments:
+  -h, --help  show this help message and exit
+
+yarving@yarving-VirtualBox /tmp $ python prog.py -v 
+usage: prog.py [-h]
+prog.py: error: unrecognized arguments: -v
+
+yarving@yarving-VirtualBox /tmp $ python prog.py foo
+usage: prog.py [-h]
+prog.py: error: unrecognized arguments: foo
+```
+
+- 第一个没有任何输出和出错
+- 第二个测试为打印帮助信息，argparse会自动生成帮助文档
+- 第三个测试为**未定义的-v参数，会出错**
+- 第四个测试为未定义的参数foo，出错
+
+## positional arguments
+
+positional arguments为英文定义，中文名叫有翻译为定位参数的，用法是不用带-就可用
+修改prog.py的内容如下：
+
+```python
+#!/usr/bin/env python
+# encoding: utf-8
+import argparse
+parser = argparse.ArgumentParser()
+parser.add_argument("echo")
+args = parser.parse_args()
+print args.echo
+```
+
+执行测试如下
+
+```python
+yarving@yarving-VirtualBox /tmp $ python prog.py   
+usage: prog.py [-h] echo
+prog.py: error: too few arguments
+
+yarving@yarving-VirtualBox /tmp $ python prog.py -h
+usage: prog.py [-h] echo
+
+positional arguments:
+  echo
+
+optional arguments:
+  -h, --help  show this help message and exit
+
+yarving@yarving-VirtualBox /tmp $ python prog.py hahahaha
+hahahaha
+```
+
+定义了一个叫`echo`的参数，默认必选
+
+- 第一个测试为不带参数，由于`echo`参数为空，所以报错，并给出用法（usage）和错误信息
+- 第二个测试为打印帮助信息
+- 第三个测试为正常用法，回显了输入字符串hahahaha
+
+## optional arguments
+
+中文名叫可选参数，有两种方式：
+
+1. 一种是通过一个`-`来指定的**短参数**，如`-h`；
+2. 一种是通过`--`来指定的长参数，如`--help`
+
+这两种方式可以同存，也可以只存在一个，修改prog.py内容如下：
+
+```python
+#!/usr/bin/env python
+# encoding: utf-8
+import argparse
+parser = argparse.ArgumentParser()
+parser.add_argument("-v", "--verbosity", help="increase output verbosity")
+args = parser.parse_args()
+if args.verbosity:
+        print "verbosity turned on"
+```
+
+注意这一行：`parser.add_argument("-v", "--verbosity", help="increase output verbosity")`
+定义了可选参数`-v`或`--verbosity`，通过解析后，其值保存在`args.verbosity`变量中
+用法如下：
+
+```python
+yarving@yarving-VirtualBox /tmp $ python prog.py -v 1
+verbosity turned on
+
+yarving@yarving-VirtualBox /tmp $ python prog.py --verbosity 1
+verbosity turned on
+
+yarving@yarving-VirtualBox /tmp $ python prog.py -h           
+usage: prog.py [-h] [-v VERBOSITY]
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -v VERBOSITY, --verbosity VERBOSITY
+                        increase output verbosity
+
+yarving@yarving-VirtualBox /tmp $ python prog.py -v 
+usage: prog.py [-h] [-v VERBOSITY]
+prog.py: error: argument -v/--verbosity: expected one argument
+```
+
+- 测试1中，通过`-v`来指定参数值
+- 测试2中，通过`--verbosity`来指定参数值
+- 测试3中，通过`-h`来打印帮助信息
+- 测试4中，没有给`-v`指定参数值，所以会报错
+
+## action='store_true'
+
+上一个用法中-v必须指定参数值，否则就会报错，有没有像`-h`那样，不需要指定参数值的呢，答案是有，通过定义参数时指定`action="store_true"`即可，用法如下
+
+```
+#!/usr/bin/env python
+# encoding: utf-8
 
 
+import argparse
 
+
+parser = argparse.ArgumentParser()
+parser.add_argument("-v", "--verbose", help="increase output verbosity",
+                    action="store_true")
+args = parser.parse_args()
+if args.verbose:
+        print "verbosity turned on"
+```
+
+测试：
+
+```
+yarving@yarving-VirtualBox /tmp $ python prog.py -v
+verbosity turned on
+
+yarving@yarving-VirtualBox /tmp $ python prog.py -h
+usage: prog.py [-h] [-v]
+
+optional arguments:
+  -h, --help     show this help message and exit
+  -v, --verbose  increase output verbosity
+```
+
+第一个例子中，`-v`没有指定任何参数也可，其实存的是`True`和`False`，如果出现，则其值为`True`，否则为`False`
+
+##  类型 type
+
+默认的参数类型为str，如果要进行数学计算，需要对参数进行解析后进行类型转换，如果不能转换则需要报错，这样比较麻烦
+argparse提供了对参数类型的解析，如果类型不符合，则直接报错。如下是对参数进行平方计算的程序：
+
+```
+#!/usr/bin/env python
+# encoding: utf-8
+
+
+import argparse
+
+
+parser = argparse.ArgumentParser()
+parser.add_argument('x', type=int, help="the base")
+args = parser.parse_args()
+answer = args.x ** 2
+print answer
+```
+
+测试
+
+```
+yarving@yarving-VirtualBox /tmp $ python prog.py 2
+4
+
+yarving@yarving-VirtualBox /tmp $ python prog.py two
+usage: prog.py [-h] x
+prog.py: error: argument x: invalid int value: 'two'
+
+yarving@yarving-VirtualBox /tmp $ python prog.py -h 
+usage: prog.py [-h] x
+
+positional arguments:
+  x           the base
+
+optional arguments:
+  -h, --help  show this help message and exit
+```
+
+- 第一个测试为计算2的平方数，类型为int，正常
+- 第二个测试为一个非int数，报错
+- 第三个为打印帮助信息
+
+## 可选值choices=[]
+
+5中的action的例子中定义了默认值为`True`和`False`的方式，如果要限定某个值的取值范围，比如6中的整形，限定其取值范围为0， 1， 2，该如何进行呢？
+修改prog.py文件如下：
+
+```
+#!/usr/bin/env python
+# encoding: utf-8
+
+
+import argparse
+
+
+parser = argparse.ArgumentParser()
+parser.add_argument("square", type=int,
+                    help="display a square of a given number")
+parser.add_argument("-v", "--verbosity", type=int, choices=[0, 1, 2],
+                    help="increase output verbosity")
+args = parser.parse_args()
+answer = args.square**2
+if args.verbosity == 2:
+    print "the square of {} equals {}".format(args.square, answer)
+elif args.verbosity == 1:
+    print "{}^2 == {}".format(args.square, answer)
+else:
+    print answer
+```
+
+测试如下：
+
+```
+yarving@yarving-VirtualBox /tmp $ python prog.py 4 -v 0
+16
+yarving@yarving-VirtualBox /tmp $ python prog.py 4 -v 1
+4^2 == 16
+yarving@yarving-VirtualBox /tmp $ python prog.py 4 -v 2
+the square of 4 equals 16
+yarving@yarving-VirtualBox /tmp $ python prog.py 4 -v 3
+usage: prog.py [-h] [-v {0,1,2}] square
+prog.py: error: argument -v/--verbosity: invalid choice: 3 (choose from 0, 1, 2)
+yarving@yarving-VirtualBox /tmp $ python prog.py -h
+usage: prog.py [-h] [-v {0,1,2}] square
+
+positional arguments:
+  square                display a square of a given number
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -v {0,1,2}, --verbosity {0,1,2}
+                        increase output verbosity
+```
+
+- 测试1， 2， 3 为可选值范围，通过其值，打印不同的格式输出；
+- 测试4的verbosity值不在可选值范围内，打印错误
+- 测试5打印帮助信息
+
+## 自定义帮助信息help
+
+上面很多例子中都为help赋值，如
+`parser.add_argument("square", type=int, help="display a square of a given number")`
+在打印输出时，会有如下内容
+
+```
+positional arguments:
+  square                display a square of a given number
+```
+
+也就是help为什么，打印输出时，就会显示什么
+
+## 程序用法帮助
+
+8中介绍了为每个参数定义帮助文档，那么给整个程序定义帮助文档该怎么进行呢？
+通过`argparse.ArgumentParser(description="calculate X to the power of Y")`即可
+修改prog.py内容如下：
+
+```
+#!/usr/bin/env python
+# encoding: utf-8
+
+
+import argparse
+
+
+parser = argparse.ArgumentParser(description="calculate X to the power of Y")
+group = parser.add_mutually_exclusive_group()
+group.add_argument("-v", "--verbose", action="store_true")
+group.add_argument("-q", "--quiet", action="store_true")
+parser.add_argument("x", type=int, help="the base")
+parser.add_argument("y", type=int, help="the exponent")
+args = parser.parse_args()
+answer = args.x**args.y
+
+if args.quiet:
+    print answer
+elif args.verbose:
+    print "{} to the power {} equals {}".format(args.x, args.y, answer)
+else:
+    print "{}^{} == {}".format(args.x, args.y, answer)
+```
+
+打印帮助信息时即显示*calculate X to the power of Y*
+
+```
+yarving@yarving-VirtualBox /tmp $ python prog.py -h
+usage: prog.py [-h] [-v | -q] x y
+
+calculate X to the power of Y
+
+positional arguments:
+  x              the base
+  y              the exponent
+
+optional arguments:
+  -h, --help     show this help message and exit
+  -v, --verbose
+  -q, --quiet
+```
+
+##  互斥参数
+
+在上个例子中介绍了互斥的参数
+
+```
+group = parser.add_mutually_exclusive_group()
+group.add_argument("-v", "--verbose", action="store_true")
+group.add_argument("-q", "--quiet", action="store_true")
+```
+
+第一行定义了一个互斥组，第二、三行在互斥组中添加了`-v`和`-q`两个参数，用上个例子中的程序进行如下测试：
+
+```
+yarving@yarving-VirtualBox /tmp $ python prog.py 4 2      
+4^2 == 16
+yarving@yarving-VirtualBox /tmp $ python prog.py 4 2 -v
+4 to the power 2 equals 16
+yarving@yarving-VirtualBox /tmp $ python prog.py 4 2 -q
+16
+yarving@yarving-VirtualBox /tmp $ python prog.py 4 2 -q -v
+```
+
+可以看出，`-q`和`-v`不出现，或仅出现一个都可以，同时出现就会报错。
+可定义多个互斥组
+
+## 参数默认值
+
+介绍了这么多，有没有参数默认值该如何定义呢？
+修改prog.py内容如下：
+
+```
+#!/usr/bin/env python
+# encoding: utf-8
+
+
+import argparse
+
+
+parser = argparse.ArgumentParser(description="calculate X to the power of Y")
+parser.add_argument("square", type=int,
+                    help="display a square of a given number")
+parser.add_argument("-v", "--verbosity", type=int, choices=[0, 1, 2], default=1,
+                    help="increase output verbosity")
+args = parser.parse_args()
+answer = args.square**2
+if args.verbosity == 2:
+    print "the square of {} equals {}".format(args.square, answer)
+elif args.verbosity == 1:
+    print "{}^2 == {}".format(args.square, answer)
+else:
+    print answer
+```
+
+测试结果如下
+
+```
+yarving@yarving-VirtualBox /tmp $ python prog.py 8 
+8^2 == 64
+yarving@yarving-VirtualBox /tmp $ python prog.py 8 -v 0
+64
+yarving@yarving-VirtualBox /tmp $ python prog.py 8 -v 1
+8^2 == 64
+yarving@yarving-VirtualBox /tmp $ python prog.py 8 -v 2
+the square of 8 equals 64
+```
+
+可以看到如果不指定`-v`的值，`args.verbosity`的值默认为1，为了更清楚的看到默认值，也可以直接打印进行测试。
 
 # 目录问题
 
@@ -180,6 +748,7 @@ print(alist,b)
 # 根据设备自动调用CUDA
 
 ```python
+import torch
 use_cuda = torch.cuda.is_available() #判断设备是否可以使用GPU
 #如果可是使用GPU，则将模型、数据集、和标签转化为CUDA模式
 if use_cuda:
