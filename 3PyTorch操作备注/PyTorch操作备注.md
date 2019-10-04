@@ -1,5 +1,39 @@
 [TOC]
 
+# 绘图
+
+
+
+# 读取txt文件中os.walk的使用
+
+```python
+import os
+for root, dirs, files in os.walk("/home/r/renpengzhen/PyTorch/darts-master/NAS_AR_CNN/core", topdown=False):
+    print(root)
+
+#输出目录的路径
+/home/r/renpengzhen/PyTorch/darts-master/NAS_AR_CNN/core/__pycache__
+/home/r/renpengzhen/PyTorch/darts-master/NAS_AR_CNN/core
+
+import os
+for root, dirs, files in os.walk("/home/r/renpengzhen/PyTorch/darts-master/NAS_AR_CNN/core", topdown=False):
+    print(dirs)
+
+#root下所有子目录的名字               
+[]
+['__pycache__']
+
+import os
+for root, dirs, files in os.walk("/home/r/renpengzhen/PyTorch/darts-master/NAS_AR_CNN/core", topdown=False):
+    print(files)
+
+#包含了所有非目录文件的名字
+['architect.cpython-35.pyc', 'utils.cpython-35.pyc', 'config.cpython-35.pyc', 'metrics.cpython-35.pyc', 'const.cpython-35.pyc', 'data_utils.cpython-35.pyc']
+['architect.py', 'utils.py', 'metrics.py', 'const.py', 'data_utils.py', 'config.py']
+```
+
+
+
 # 对shape的操作
 
 ```python
@@ -952,4 +986,35 @@ Example_Picture = readImage('dog.jpg',size=32)
 showTorchImage(Example_Picture)
 ```
 
+# 笔试编程题
 
+![img](PyTorch操作备注.assets/C07C31660CFCC91258A5DBABEBFCF681.jpg)
+
+```python
+if __name__ == '__main__':
+    data = int(input())
+    l = []
+    for i in range(int(data/2)):
+        x1 = i+1
+        x2 = data - x1
+        x = [x1,x2]
+        while x[0]<x[1]:
+            x_lishi = x[1] - x[0]
+            x = [x_lishi] + x
+        l += [len(x)+1]
+    dict = {}
+    for key in l:
+        dict[key] = dict.get(key, 0) + 1
+    a = 0
+    if 3 in dict.keys():
+        a = dict[3]
+    if data%2 == 0:
+        b = int((data-1)/2)
+    else:
+        b = int(data/2)
+    dict[3] = dict.get(3, a + b)
+    for key in dict.keys():
+        print('%d %d'%(key,dict[key]))
+```
+
+![1567938385361](PyTorch操作备注.assets/1567938385361.png)![1567938413304](PyTorch操作备注.assets/1567938413304.png)
