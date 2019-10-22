@@ -4,27 +4,35 @@
 
 
 
-# 读取txt文件中os.walk的使用
+# os.walk的使用
+
+用于读取一个文件夹下的所有文件
 
 ```python
 import os
-for root, dirs, files in os.walk("/home/r/renpengzhen/PyTorch/darts-master/NAS_AR_CNN/core", topdown=False):
+path = "/home/r/renpengzhen/PyTorch/darts-master/NAS_AR_CNN/core"
+for root, dirs, files in os.walk(path, topdown=False):
     print(root)
 
 #输出目录的路径
 /home/r/renpengzhen/PyTorch/darts-master/NAS_AR_CNN/core/__pycache__
 /home/r/renpengzhen/PyTorch/darts-master/NAS_AR_CNN/core
 
+```
+
+```python
 import os
-for root, dirs, files in os.walk("/home/r/renpengzhen/PyTorch/darts-master/NAS_AR_CNN/core", topdown=False):
+for root, dirs, files in os.walk(path, topdown=False):
     print(dirs)
 
 #root下所有子目录的名字               
 []
 ['__pycache__']
+```
 
+```python
 import os
-for root, dirs, files in os.walk("/home/r/renpengzhen/PyTorch/darts-master/NAS_AR_CNN/core", topdown=False):
+for root, dirs, files in os.walk(path, topdown=False):
     print(files)
 
 #包含了所有非目录文件的名字
@@ -58,7 +66,7 @@ tensor([[ 1,  4,  2,  5,  3,  6],
 
 
 
-# 文件读取
+# 对文件（夹）的处理
 
 ## 读取.pkl文件
 
@@ -70,6 +78,14 @@ def pkl_load(path):
     with open(path, 'rb') as f:
         data = pkl.load(f)
     return data
+```
+
+## 判断文件夹是否存在
+
+```python
+#判断是否存在，不存在进行创建文件夹
+if not os.path.exists(transform_path): 
+    os.makedirs(transform_path)
 ```
 
 
