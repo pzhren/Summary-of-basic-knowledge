@@ -39,6 +39,22 @@ for root, dirs, files in os.walk(path, topdown=False):
 ['architect.cpython-35.pyc', 'utils.cpython-35.pyc', 'config.cpython-35.pyc', 'metrics.cpython-35.pyc', 'const.cpython-35.pyc', 'data_utils.cpython-35.pyc']
 ['architect.py', 'utils.py', 'metrics.py', 'const.py', 'data_utils.py', 'config.py']
 ```
+实例：
+```python
+model_path = '/home/r/renpengzhen/PyTorch/timeception-master/data/Charades/models/charades_timeception_19.10.25-09:47:34' #model目录
+    n_epochs = len(os.listdir(model_path))//2 #计算一个文件夹下文件的个数
+    i = 0
+    model_file_path = [] 
+    weight_file_path = []
+    for root, dirs, files in os.walk(model_path):
+        files.sort() #对文件夹里面文件按照文件名进行排序
+        for file in files:
+            if i%2==0:
+                model_file_path += [os.path.join(root,file)] #加在列表中
+            else:
+                weight_file_path += [os.path.join(root,file)] #加在列表中
+            i += 1
+```
 
 
 
