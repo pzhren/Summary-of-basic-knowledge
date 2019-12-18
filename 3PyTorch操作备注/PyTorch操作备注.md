@@ -909,11 +909,27 @@ plt.show()
 
 ![1563329092861](PyTorch操作备注.assets/1563329092861.png)
 
-# shape和size的区别
+# 对tensor的操作
 
-## [numpy] 
+## 初始化一个空的tensor
 
-### .size：计算数组和矩阵所有数据的个数 
+```python
+import torch
+a = torch.empty(0,1024,36,7,7) #将其中的一个维度设置为0，即可定义一个空的tensor，在用来拼接tensor时是十分有用的
+a
+Out[26]: tensor([], size=(0, 1024, 36, 7, 7))
+b = torch.rand(1,1024,36,7,7)
+torch.cat((a,b),0).size()
+Out[27]: torch.Size([1, 1024, 36, 7, 7])
+```
+
+
+
+## shape和size的区别
+
+### [numpy] 
+
+#### .size：计算数组和矩阵所有数据的个数 
 
 ```python
 a = np.array([[1,2,3],[4,5,6]]) 
@@ -922,7 +938,7 @@ np.size(a,1)#返回值为 3
 a.size ##返回值为 6
 ```
 
-### .shape():得到矩阵每维的大小 
+#### .shape():得到矩阵每维的大小 
 
 ```python
 a = np.array([[1,2,3],[4,5,6]]) 
@@ -932,9 +948,9 @@ a.shape #返回值为 (2,3)
 
 >另外要注意的是，shape和size既可以作为函数，也可以作为ndarray的属性 
 
-## [pytorch]
+### [pytorch]
 
-### .shape
+#### .shape
 
 ```python
 theta = torch.tensor([
@@ -943,7 +959,7 @@ theta = torch.tensor([
 ], dtype=torch.float)
 theta.shape #torch.Size([2, 3])
 ```
-### .size()
+#### .size()
 ```python
 theta = torch.tensor([
     [1, 0, -0.2],
@@ -952,11 +968,9 @@ theta = torch.tensor([
 theta.size() #torch.Size([2, 3])
 ```
 
+## pytorch中squeeze()和unsqueeze()函数介绍
 
-
-# pytorch中squeeze()和unsqueeze()函数介绍
-
-## **unsqueeze()函数**：增加维度
+### **unsqueeze()函数**：增加维度
 
 
 
@@ -970,7 +984,7 @@ theta.size() #torch.Size([2, 3])
 
 可以看出a的维度已经变为（2，1，3）了，同样如果需要在倒数第二个维度上增加一个维度，那么使用b.unsqueeze(-2)
 
-## **squeeze()函数介绍**：减小维度
+### **squeeze()函数介绍**：减小维度
 
 1.首先得到一个维度为（1，2，3）的tensor（张量）
 
